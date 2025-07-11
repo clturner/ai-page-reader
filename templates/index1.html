@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Book Reader</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Upload a Book Page</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required />
+        <br><br>
+        <label>
+            <input type="checkbox" name="split_pages" />
+            This image contains two pages (left and right)
+        </label>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if text %}
+        <h2>Detected Page{{ "s" if right_image or right_image_2 else "" }}</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;">
+
+            <!-- LEFT COLUMN 1 -->
+            {% if left_image %}
+            <div style="flex: 1;">
+                <h4>Left Page - Column 1</h4>
+                <img src="{{ url_for('static', filename=left_image) }}" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px;">
+            </div>
+            {% endif %}
+
+            <!-- LEFT COLUMN 2 -->
+            {% if left_image_2 %}
+            <div style="flex: 1;">
+                <h4>Left Page - Column 2</h4>
+                <img src="{{ url_for('static', filename=left_image_2) }}" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px;">
+            </div>
+            {% endif %}
+
+            <!-- RIGHT COLUMN 1 -->
+            {% if right_image %}
+            <div style="flex: 1;">
+                <h4>Right Page - Column 1</h4>
+                <img src="{{ url_for('static', filename=right_image) }}" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px;">
+            </div>
+            {% endif %}
+
+            <!-- RIGHT COLUMN 2 -->
+            {% if right_image_2 %}
+            <div style="flex: 1;">
+                <h4>Right Page - Column 2</h4>
+                <img src="{{ url_for('static', filename=right_image_2) }}" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px;">
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Debug Images -->
+        <div style="margin-top: 30px;">
+            {% if debug_left %}
+                <h4>Left Debug</h4>
+                <img src="{{ url_for('static', filename=debug_left) }}" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px;">
+            {% endif %}
+            {% if debug_right %}
+                <h4>Right Debug</h4>
+                <img src="{{ url_for('static', filename=debug_right) }}" style="max-width: 100%; max-height: 300px; display: block; margin-bottom: 10px;">
+            {% endif %}
+        </div>
+
+        <h2>Extracted Text</h2>
+        <pre>{{ text }}</pre>
+
+        <h2>Speech</h2>
+        <audio controls>
+            <source src="{{ url_for('static', filename=audio) }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    {% endif %}
+</body>
+</html>

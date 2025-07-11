@@ -1,0 +1,13 @@
+# Ignore generated audio files
+speech-*
+
+# Or ignore all audio outputs in general
+*.wav
+*.mp3
+*.ogg
+
+# Common Python ignores
+__pycache__/
+*.pyc
+.env
+venv/
