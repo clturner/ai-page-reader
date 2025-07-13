@@ -12,7 +12,7 @@ from PIL import ImageOps
 import re
 import os
 import cohere
-
+import logging
 
 load_dotenv()
 
@@ -70,6 +70,16 @@ bedrock_list = boto3.client(
     service_name='bedrock',
     region_name='us-east-1'  # or your correct region
 )
+
+
+# Set up basic logging to console
+logging.basicConfig(level=logging.DEBUG)
+
+# Catch unhandled exceptions globally
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.exception("An error occurred during a request:")
+    return f"An internal error occurred: {str(e)}", 500
 
 
 # Function to upload an image to S3 and return the key
@@ -588,4 +598,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+     app.run(debug=True, host='0.0.0.0', port=5000)
