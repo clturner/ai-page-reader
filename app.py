@@ -428,6 +428,9 @@ def clean_text_with_cohere(ocr_text: str, co) -> str:
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        if "image" not in request.files or request.files["image"].filename == "":
+            return render_template("index.html", text=None, audio=None, error="No image was uploaded.")
+
         try:
             file = request.files["image"]
             try:
