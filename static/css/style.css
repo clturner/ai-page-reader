@@ -196,6 +196,13 @@ img {
   border-style: none;
 }
 
+.resized-image {
+  height: 300px; /* Set to your preferred uniform height */
+  width: auto;   /* Automatically adjust width to preserve aspect ratio */
+  display: block;
+  margin: 0 auto; /* Optional: center the image */
+}
+
 svg {
   overflow: hidden;
   vertical-align: middle;
@@ -529,7 +536,6 @@ mark,
 
 .img-fluid {
   max-width: 100%;
-  height: auto;
 }
 
 .img-thumbnail {

@@ -3,77 +3,47 @@ import boto3
 import uuid
 import os
 from dotenv import load_dotenv
-from PIL import Image
+from PIL import Image, ImageOps, ImageDraw
 import io
 import numpy as np
 import cv2
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from PIL import ImageOps
 import re
-import os
 import cohere
 import logging
 
+# Setup
 load_dotenv()
-
-
-
 cohere_api_key = os.getenv("CO_API_KEY")
-# Load Coere api key
 co = cohere.Client(cohere_api_key)
-
 app = Flask(__name__)
 
-# Ensure static folders exist
 os.makedirs("static/audio", exist_ok=True)
 os.makedirs("static/images", exist_ok=True)
 
-# Load AWS credentials
 aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
 aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 aws_region = os.getenv("AWS_REGION")
 bucket_name = os.getenv("S3_BUCKET")
 
-# Set up AWS clients
-s3 = boto3.client('s3',
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    region_name=aws_region
-)
-
-textract = boto3.client('textract',
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    region_name=aws_region
-)
-
-polly = boto3.client('polly',
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    region_name=aws_region
-)
-
-comprehend = boto3.client('comprehend',
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    region_name=aws_region
-)
-
-bedrock = boto3.client(
-    service_name='bedrock-runtime',
-    region_name='us-east-1',  # or 'us-east-2' if that's where your models are
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key
-)
-
-bedrock_list = boto3.client(
-    service_name='bedrock',
-    region_name='us-east-1'  # or your correct region
-)
-
+s3 = boto3.client('s3', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, region_name=aws_region)
+textract = boto3.client('textract', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, region_name=aws_region)
+polly = boto3.client('polly', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, region_name=aws_region)
+comprehend = boto3.client('comprehend', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, region_name=aws_region)
 
 # Set up basic logging to console
 logging.basicConfig(level=logging.DEBUG)
+
+def try_wrapper(func):
+    def wrapped(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logging.exception(f"Error in {func.__name__}")
+            return None
+    return wrapped
 
 # Catch unhandled exceptions globally
 @app.errorhandler(Exception)
@@ -83,6 +53,7 @@ def handle_exception(e):
 
 
 # Function to upload an image to S3 and return the key
+@try_wrapper
 def upload_to_s3(image_obj, label):
     if image_obj.mode != "RGB":
         image_obj = image_obj.convert("RGB")  # ✅ Ensure JPEG-compatible format
@@ -95,6 +66,7 @@ def upload_to_s3(image_obj, label):
     return key
 
 # Function to save an image locally as JPEG
+@try_wrapper
 def save_image(image_obj, label):
     if image_obj.mode != "RGB":
         image_obj = image_obj.convert("RGB")  # ✅ Convert before saving as JPEG
@@ -106,6 +78,7 @@ def save_image(image_obj, label):
 from PIL import ImageDraw
 
 # Function to normalize lighting in a PIL image using OpenCV
+@try_wrapper
 def normalize_lighting(pil_img):
     # Convert PIL image to OpenCV BGR format
     img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
@@ -127,6 +100,7 @@ def normalize_lighting(pil_img):
     return normalized_pil
 
 # Function to save density overlay image
+@try_wrapper
 def save_density_overlay(thresh_img, density, filename):
     norm_density = np.clip(density / np.max(density) * 255, 0, 255).astype(np.uint8)
     overlay = cv2.cvtColor(thresh_img, cv2.COLOR_GRAY2BGR)
@@ -141,6 +115,7 @@ def save_density_overlay(thresh_img, density, filename):
     cv2.imwrite(filename, overlay)
 
 # Function to apply CLAHE if needed based on average brightness and contrast
+@try_wrapper
 def apply_clahe_if_needed(img_gray):
     avg_brightness = np.mean(img_gray)
     contrast = np.std(img_gray)
@@ -156,6 +131,7 @@ def apply_clahe_if_needed(img_gray):
 
 
 # Function to detect vertical split in an image and draw the split line if found
+@try_wrapper
 def detect_vertical_split_column(image, density_threshold=2, min_gap_width_ratio=0.01, debug_filename=None):
     print(f"[Split] Using density threshold: {density_threshold}, min_gap_width_ratio: {min_gap_width_ratio}")
 
@@ -276,11 +252,9 @@ def detect_vertical_split_column(image, density_threshold=2, min_gap_width_ratio
     print(f"[Split] Final split_x returned: {split_x}")
     return split_x
 
-
-
-
 # Function to deskew an image using OpenCV
 #    tweak angle_threshold=1.0 up to 1.5 or 2.0 if it's still over-rotating
+@try_wrapper
 def deskew_image(pil_img, angle_threshold=1.0):
     img = np.array(pil_img.convert('L'))
     img = cv2.bitwise_not(img)
@@ -313,6 +287,7 @@ def deskew_image(pil_img, angle_threshold=1.0):
 
 
 # Function to detect the dominant language of the text
+@try_wrapper
 def detect_language(text):
     response = comprehend.detect_dominant_language(Text=text)
     languages = response['Languages']
@@ -335,6 +310,7 @@ LANGUAGE_VOICE_MAP = {
 }
 
 # Split long text into chunks for Polly
+@try_wrapper
 def split_text(text, max_length=1400):
     import re
     sentences = re.split(r'(?<=[.!?]) +', text)
@@ -355,6 +331,7 @@ def split_text(text, max_length=1400):
 
 
 # Extract text from an S3 object using Textract
+@try_wrapper
 def extract_text_from_image(s3_key):
     response = textract.detect_document_text(
         Document={"S3Object": {"Bucket": bucket_name, "Name": s3_key}}
@@ -363,6 +340,7 @@ def extract_text_from_image(s3_key):
     return "\n".join(lines)
 
 # Function to clean OCR text for narration
+@try_wrapper
 def light_clean_ocr_text(text: str, wrap_speak: bool = True, max_length: int = None) -> str:
     # Replace curly apostrophes and quotes
     text = text.replace("’", "'").replace("“", '"').replace("”", '"')
@@ -402,6 +380,7 @@ def light_clean_ocr_text(text: str, wrap_speak: bool = True, max_length: int = N
     return text if not wrap_speak else f"<speak>{text}</speak>"
 
 # Function to clean OCR text using Cohere's 'command-r-plus' model
+@try_wrapper
 def clean_text_with_cohere(ocr_text: str, co) -> str:
     """
     Cleans OCR text for narration using Cohere's 'command-r-plus' model.
@@ -449,153 +428,182 @@ def clean_text_with_cohere(ocr_text: str, co) -> str:
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        file = request.files["image"]
-        image = Image.open(file.stream)
-        image = ImageOps.exif_transpose(image)  # Fix EXIF rotation
-        print(f"[Debug] Image size after EXIF transpose: {image.size}")
-        width, height = image.size
+        try:
+            file = request.files["image"]
+            try:
+                image = Image.open(file.stream)
+                image = ImageOps.exif_transpose(image)  # Fix EXIF rotation
+                print(f"[Debug] Image size after EXIF transpose: {image.size}")
+                width, height = image.size
+            except Exception as e:
+                raise RuntimeError(f"Error loading image: {e}")
 
-        split_pages = "split_pages" in request.form
+            split_pages = "split_pages" in request.form
 
-        # === ✅ Initialize all optional vars ===
-        split_left_x = None
-        split_right_x = None
-        left_filename = None
-        right_filename = None
-        debug_left = None
-        debug_right = None
-        left_text = ""
-        right_text = ""
-        full_text = ""
+            # === ✅ Initialize all optional vars ===
+            split_left_x = None
+            split_right_x = None
+            left_filename = None
+            right_filename = None
+            debug_left = None
+            debug_right = None
+            left_text = ""
+            right_text = ""
+            full_text = ""
 
-        # === Continue as before... ===
-        if split_pages:
-            # Split in half for left/right pages
-            print("[Split] Two-page mode enabled – forcing vertical split")
+            if split_pages:
+                try:
+                    print("[Split] Two-page mode enabled – forcing vertical split")
+                    mid_x = width // 2
+                    raw_left = image.crop((0, 0, mid_x, height))
+                    raw_right = image.crop((mid_x, 0, width, height))
 
-            mid_x = width // 2
-            raw_left = image.crop((0, 0, mid_x, height))
-            raw_right = image.crop((mid_x, 0, width, height))
+                    deskewed_left, rotated_left = deskew_image(raw_left)
+                    deskewed_right, rotated_right = deskew_image(raw_right)
 
-            deskewed_left, rotated_left = deskew_image(raw_left)
-            deskewed_right, rotated_right = deskew_image(raw_right)
+                    split_left_x = detect_vertical_split_column(deskewed_left, density_threshold=5, min_gap_width_ratio=0.005)
+                    if split_left_x:
+                        debug_left = "images/debug-split_left.jpg"
+                        detect_vertical_split_column(deskewed_left, debug_filename=os.path.join("static", debug_left))
 
-            split_left_x = detect_vertical_split_column(deskewed_left, density_threshold=5, min_gap_width_ratio=0.005)
-            if split_left_x:
-                debug_left = "images/debug-split_left.jpg"
-                detect_vertical_split_column(deskewed_left, debug_filename=os.path.join("static", debug_left))
+                    split_right_x = detect_vertical_split_column(deskewed_right, density_threshold=5, min_gap_width_ratio=0.005)
+                    if split_right_x:
+                        debug_right = "images/debug-split_right.jpg"
+                        detect_vertical_split_column(deskewed_right, debug_filename=os.path.join("static", debug_right))
 
-            split_right_x = detect_vertical_split_column(deskewed_right, density_threshold=5, min_gap_width_ratio=0.005)
-            if split_right_x:
-                debug_right = "images/debug-split_right.jpg"
-                detect_vertical_split_column(deskewed_right, debug_filename=os.path.join("static", debug_right))
+                    height_left = deskewed_left.height
+                    height_right = deskewed_right.height
 
-            height_left = deskewed_left.height
-            height_right = deskewed_right.height
+                    if split_left_x:
+                        left_col1 = deskewed_left.crop((0, 0, split_left_x, height_left))
+                        left_col2 = deskewed_left.crop((split_left_x, 0, deskewed_left.width, height_left))
+                        left_text = extract_text_from_image(upload_to_s3(left_col1, "left-col1"))
+                        left_text += "\n" + extract_text_from_image(upload_to_s3(left_col2, "left-col2"))
 
-            # === LEFT PAGE PROCESSING ===
-            if split_left_x:
-                left_col1 = deskewed_left.crop((0, 0, split_left_x, height_left))
-                left_col2 = deskewed_left.crop((split_left_x, 0, deskewed_left.width, height_left))
-                left_text = extract_text_from_image(upload_to_s3(left_col1, "left-col1"))
-                left_text += "\n" + extract_text_from_image(upload_to_s3(left_col2, "left-col2"))
+                        left_filename_col1 = save_image(left_col1, "left-col1")
+                        left_filename_col2 = save_image(left_col2, "left-col2")
 
-                left_filename_col1 = save_image(left_col1, "left-col1")
-                left_filename_col2 = save_image(left_col2, "left-col2")
+                        left_filename = left_filename_col1
+                    else:
+                        left_text = extract_text_from_image(upload_to_s3(deskewed_left, "left"))
+                        left_filename = save_image(deskewed_left, "left")
 
-                left_filename = left_filename_col1  # You can change logic to show both if needed
+                    if split_right_x:
+                        right_col1 = deskewed_right.crop((0, 0, split_right_x, height_right))
+                        right_col2 = deskewed_right.crop((split_right_x, 0, deskewed_right.width, height_right))
+                        right_text = extract_text_from_image(upload_to_s3(right_col1, "right-col1"))
+                        right_text += "\n" + extract_text_from_image(upload_to_s3(right_col2, "right-col2"))
+
+                        right_filename_col1 = save_image(right_col1, "right-col1")
+                        right_filename_col2 = save_image(right_col2, "right-col2")
+
+                        right_filename = right_filename_col1
+                    else:
+                        right_text = extract_text_from_image(upload_to_s3(deskewed_right, "right"))
+                        right_filename = save_image(deskewed_right, "right")
+
+                    full_text = f"{left_text.strip()}\n{right_text.strip()}"
+                except Exception as e:
+                    raise RuntimeError(f"Error processing split pages: {e}")
+
             else:
-                left_text = extract_text_from_image(upload_to_s3(deskewed_left, "left"))
-                left_filename = save_image(deskewed_left, "left")
+                try:
+                    deskewed_img, rotated_img = deskew_image(image)
+                    split_x = detect_vertical_split_column(deskewed_img)
+                    debug_img = None
 
-            # === RIGHT PAGE PROCESSING ===
-            if split_right_x:
-                right_col1 = deskewed_right.crop((0, 0, split_right_x, height_right))
-                right_col2 = deskewed_right.crop((split_right_x, 0, deskewed_right.width, height_right))
-                right_text = extract_text_from_image(upload_to_s3(right_col1, "right-col1"))
-                right_text += "\n" + extract_text_from_image(upload_to_s3(right_col2, "right-col2"))
+                    if rotated_img:
+                        debug_img = "images/debug-single.jpg"
+                        deskewed_img.save(os.path.join("static", debug_img))
 
-                right_filename_col1 = save_image(right_col1, "right-col1")
-                right_filename_col2 = save_image(right_col2, "right-col2")
+                    if split_x:
+                        debug_left = "images/debug-split_single.jpg"
+                        detect_vertical_split_column(deskewed_img, debug_filename=os.path.join("static", debug_left))
 
-                right_filename = right_filename_col1  # Again, customize display logic
+                        height_single = deskewed_img.height
+                        width_single = deskewed_img.width
+                        col1 = deskewed_img.crop((0, 0, split_x, height_single))
+                        col2 = deskewed_img.crop((split_x, 0, width_single, height_single))
+                        full_text = extract_text_from_image(upload_to_s3(col1, "col1"))
+                        full_text += "\n" + extract_text_from_image(upload_to_s3(col2, "col2"))
+                        left_filename = save_image(col1, "single-col1")
+                        right_filename = save_image(col2, "single-col2")
+                    else:
+                        single_key = upload_to_s3(deskewed_img, "single")
+                        full_text = extract_text_from_image(single_key)
+                        left_filename = save_image(deskewed_img, "single")
+
+                    if not split_x and rotated_img:
+                        debug_left = debug_img
+                except Exception as e:
+                    raise RuntimeError(f"Error processing single page: {e}")
+
+            if not full_text.strip():
+                return render_template("index.html", text=None, audio=None, error="No readable text detected in the image.")
+
+            try:
+                raw_text = light_clean_ocr_text(full_text, wrap_speak=False)
+                raw_text = clean_text_with_cohere(raw_text, co)
+            except Exception as e:
+                raise RuntimeError(f"Text cleaning failed: {e}")
+
+            try:
+                chunks = split_text(raw_text)
+                audio_filename = f"audio/speech-{uuid.uuid4()}.mp3"
+                audio_path = os.path.join("static", audio_filename)
+
+                language_code = detect_language(raw_text)
+                voice_id = LANGUAGE_VOICE_MAP.get(language_code, 'Joanna')
+
+                with open(audio_path, "wb") as out_file:
+                    for chunk in chunks:
+                        response = polly.synthesize_speech(
+                            Text=chunk,
+                            TextType="text",
+                            OutputFormat="mp3",
+                            VoiceId=voice_id
+                        )
+                        out_file.write(response["AudioStream"].read())
+            except Exception as e:
+                raise RuntimeError(f"Text-to-speech failed: {e}")
+
+            if debug_left and os.path.exists(os.path.join("static", debug_left)):
+                debug_left_render = debug_left
             else:
-                right_text = extract_text_from_image(upload_to_s3(deskewed_right, "right"))
-                right_filename = save_image(deskewed_right, "right")
+                debug_left_render = None
 
-            full_text = f"{left_text.strip()}\n{right_text.strip()}"
-
-        else:
-            # Single page processing
-            deskewed_img, rotated_img = deskew_image(image)
-
-            split_x = detect_vertical_split_column(deskewed_img)
-            debug_img = None
-            if rotated_img:
-                debug_img = "images/debug-single.jpg"
-                deskewed_img.save(os.path.join("static", debug_img))
-
-            if split_x:
-                debug_left = "images/debug-split_single.jpg"
-                detect_vertical_split_column(deskewed_img, debug_filename=os.path.join("static", debug_left))
-
-                height_single = deskewed_img.height
-                width_single = deskewed_img.width
-                col1 = deskewed_img.crop((0, 0, split_x, height_single))
-                col2 = deskewed_img.crop((split_x, 0, width_single, height_single))
-                full_text = extract_text_from_image(upload_to_s3(col1, "col1"))
-                full_text += "\n" + extract_text_from_image(upload_to_s3(col2, "col2"))
-                left_filename = save_image(col1, "single-col1")
-                right_filename = save_image(col2, "single-col2")
+            if debug_right and os.path.exists(os.path.join("static", debug_right)):
+                debug_right_render = debug_right
             else:
-                single_key = upload_to_s3(deskewed_img, "single")
-                full_text = extract_text_from_image(single_key)
-                left_filename = save_image(deskewed_img, "single")
+                debug_right_render = None
 
-            if not split_x and rotated_img:
-                debug_left = debug_img
-        
-        if not full_text.strip():
-            return "No readable text detected in the image.", 400
-        
-        raw_text = light_clean_ocr_text(full_text, wrap_speak=False)
+            return render_template(
+                "index.html",
+                text=raw_text,
+                audio=audio_filename,
+                left_image=left_filename_col1 if split_left_x else left_filename,
+                right_image=right_filename_col1 if split_right_x else right_filename,
+                left_image_2=left_filename_col2 if split_left_x else None,
+                right_image_2=right_filename_col2 if split_right_x else None,
+                debug_left=debug_left_render,
+                debug_right=debug_right_render,
 
-        raw_text = clean_text_with_cohere(raw_text, co)
+                error=None
+            )
 
-        # Text-to-speech
-        chunks = split_text(raw_text)
-        audio_filename = f"audio/speech-{uuid.uuid4()}.mp3"
-        audio_path = os.path.join("static", audio_filename)
+        except Exception as e:
+            logging.exception("Error during image processing")
+            return render_template(
+                "index.html",
+                text=None,
+                audio=None,
+                error=str(e),
+                left_image=None,
+                right_image=None,
+                left_image_2=None,
+                right_image_2=None,
+                debug_left=None,
+                debug_right=None
+            )
 
-        language_code = detect_language(raw_text)
-        voice_id = LANGUAGE_VOICE_MAP.get(language_code, 'Joanna')
-
-        with open(audio_path, "wb") as out_file:
-            for chunk in chunks:
-                response = polly.synthesize_speech(
-                    Text=chunk,
-                    TextType="text",
-                    OutputFormat="mp3",
-                    VoiceId=voice_id
-                )
-                out_file.write(response["AudioStream"].read())
-        print(f"[Render] debug_right = {debug_right}")
-        print(f"[Render] left_image = {left_filename}")
-        print(f"[Render] right_image = {right_filename}")
-        return render_template(
-            "index.html",
-            text=raw_text,
-            audio=audio_filename,
-            left_image=left_filename_col1 if split_left_x else left_filename,
-            right_image=right_filename_col1 if split_right_x else right_filename,
-            left_image_2=left_filename_col2 if split_left_x else None,
-            right_image_2=right_filename_col2 if split_right_x else None,
-            debug_left=debug_left if debug_left and os.path.exists(os.path.join("static", debug_left)) else None,
-            debug_right=debug_right if debug_right and os.path.exists(os.path.join("static", debug_right)) else None
-        )
-
-    return render_template("index.html", text=None, audio=None)
-
-
-if __name__ == "__main__":
-     app.run(debug=True, host='0.0.0.0', port=5000)
+    return render_template("index.html", text=None, audio=None, error=None)

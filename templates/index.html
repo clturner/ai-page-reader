@@ -6,9 +6,6 @@
     <title>AI Book Reader - Edukate Theme</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <!-- Favicon -->
-    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon">
-
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
@@ -103,6 +100,11 @@
     <!-- Header / Upload Section End -->
 
     <!-- Results Section Start -->
+    {% if error %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error }}
+        </div>
+    {% endif %}
     <div class="container mb-5">
         {% if text %}
         <h2 class="mb-4">Detected Page{{ "s" if right_image or right_image_2 else "" }}</h2>
@@ -110,28 +112,28 @@
             {% if left_image %}
             <div class="col-md-3">
                 <h4>Left Page - Column 1</h4>
-                <img src="{{ url_for('static', filename=left_image) }}" class="img-fluid rounded mb-3">
+                <img src="{{ url_for('static', filename=left_image) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
 
             {% if left_image_2 %}
             <div class="col-md-3">
                 <h4>Left Page - Column 2</h4>
-                <img src="{{ url_for('static', filename=left_image_2) }}" class="img-fluid rounded mb-3">
+                <img src="{{ url_for('static', filename=left_image_2) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
 
             {% if right_image %}
             <div class="col-md-3">
                 <h4>Right Page - Column 1</h4>
-                <img src="{{ url_for('static', filename=right_image) }}" class="img-fluid rounded mb-3">
+                <img src="{{ url_for('static', filename=right_image) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
 
             {% if right_image_2 %}
             <div class="col-md-3">
                 <h4>Right Page - Column 2</h4>
-                <img src="{{ url_for('static', filename=right_image_2) }}" class="img-fluid rounded mb-3">
+                <img src="{{ url_for('static', filename=right_image_2) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
         </div>
