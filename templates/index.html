@@ -19,7 +19,11 @@
     <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+     <!-- <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"> -->
+
+    <!-- version query for css file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+
 </head>
 
 <body>
@@ -50,7 +54,7 @@
     <div class="container-fluid p-0">
         <nav class="navbar navbar-expand-lg bg-white navbar-light py-3 py-lg-0 px-lg-5">
             <a href="{{ url_for('index') }}" class="navbar-brand ml-lg-3">
-                <h1 class="m-0 text-uppercase text-primary"><i class="fa fa-book-reader mr-3"></i>SnapReadAI</h1>
+                <h1 class="m-0 text-primary"><i class="fa fa-book-reader mr-3"></i>SnapReadAI</h1>
             </a>
             <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                 <span class="navbar-toggler-icon"></span>
@@ -59,14 +63,11 @@
                 <div class="navbar-nav mx-auto py-0">
                     <a href="{{ url_for('index') }}" class="nav-item nav-link active">Home</a>
                     <a href="#" class="nav-item nav-link">About</a>
-                    <a href="#" class="nav-item nav-link">Courses</a>
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">How It Works</a>
                         <div class="dropdown-menu m-0">
-                            <a href="#" class="dropdown-item">Course Detail</a>
-                            <a href="#" class="dropdown-item">Our Features</a>
-                            <a href="#" class="dropdown-item">Instructors</a>
-                            <a href="#" class="dropdown-item">Testimonial</a>
+                            <a href="#" class="dropdown-item">Features</a>
+                            <a href="#" class="dropdown-item">Instructions</a>
                         </div>
                     </div>
                     <a href="#" class="nav-item nav-link">Contact</a>
@@ -80,7 +81,6 @@
     <!-- Header / Upload Section Start -->
     <div class="jumbotron jumbotron-fluid position-relative overlay-bottom" style="margin-bottom: 90px;">
         <div class="container text-center my-5 py-5">
-            <h1 class="text-white mt-4 mb-4">Learn From Home</h1>
             <h1 class="text-white display-1 mb-5">Upload Your Book Page</h1>
 
             <!-- Upload Form -->
@@ -175,10 +175,9 @@
             <div class="row">
                 <div class="col-md-6 mb-5">
                     <a href="{{ url_for('index') }}" class="navbar-brand">
-                        <h1 class="mt-n2 text-uppercase text-white"><i class="fa fa-book-reader mr-3"></i>Edukate</h1>
+                        <h1 class="mt-n2 text-white"><i class="fa fa-book-reader mr-3"></i>SnapReadAI</h1>
                     </a>
-                    <p class="m-0">Accusam nonumy clita sed rebum kasd eirmod elitr. Ipsum ea lorem at et diam est, tempor rebum
-                        ipsum sit ea tempor stet et consetetur dolores. Justo stet diam ipsum lorem vero clita diam</p>
+                    <p class="m-0">Instantly turn pictures of book pages into clear, spoken audio. Snap it, read it, or listen on the go.</p>
                 </div>
                 <div class="col-md-6 mb-5">
                     <h3 class="text-white mb-4">Newsletter</h3>
@@ -207,13 +206,10 @@
                     </div>
                 </div>
                 <div class="col-md-4 mb-5">
-                    <h3 class="text-white mb-4">Our Courses</h3>
+                    <h3 class="text-white mb-4">How it works</h3>
                     <div class="d-flex flex-column justify-content-start">
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Web Design</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Apps Design</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Marketing</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Research</a>
-                        <a class="text-white-50" href="#"><i class="fa fa-angle-right mr-2"></i>SEO</a>
+                        <a href="#" class="dropdown-item">Features</a>
+                        <a href="#" class="dropdown-item">Instructions</a>
                     </div>
                 </div>
                 <div class="col-md-4 mb-5">
@@ -234,11 +230,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
-                    <p class="m-0">Copyright &copy; <a class="text-white" href="#">Your Site Name</a>. All Rights Reserved.
+                    <p class="m-0">Copyright &copy; <a class="text-white" href="#">SnapReadAI</a>. All Rights Reserved.
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-right">
-                    <p class="m-0">Designed by <a class="text-white" href="https://htmlcodex.com">HTML Codex</a> Distributed
+                    <p class="m-0">Designed by <a class="text-white" href="https://htmlcodex.com">Christopher Turner</a> Distributed
                         by <a href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
                 </div>
             </div>

@@ -547,6 +547,16 @@ mark,
   height: auto;
 }
 
+.jumbotron {
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7)), 
+                url(../img/header.jpg) no-repeat center center !important;
+    background-size: cover !important;
+    color: white !important; /* Optional: for contrast */
+}
+
+.dropdown-item {
+  color: #898796 !important;
+}
 .figure {
   display: inline-block;
 }
