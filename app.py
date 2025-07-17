@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import re
 import cohere
 import logging
+from werkzeug.exceptions import HTTPException
+
 
 # Setup
 load_dotenv()
@@ -34,7 +36,8 @@ polly = boto3.client('polly', aws_access_key_id=aws_access_key, aws_secret_acces
 comprehend = boto3.client('comprehend', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, region_name=aws_region)
 
 # Set up basic logging to console
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
+
 
 def try_wrapper(func):
     def wrapped(*args, **kwargs):
@@ -45,11 +48,19 @@ def try_wrapper(func):
             return None
     return wrapped
 
-# Catch unhandled exceptions globally
 @app.errorhandler(Exception)
 def handle_exception(e):
-    logging.exception("An error occurred during a request:")
-    return f"An internal error occurred: {str(e)}", 500
+    # Special case: suppress favicon.ico 404 errors (common in browsers)
+    if request.path == '/favicon.ico':
+        return '', 204  # No Content, don't log
+
+    # Let Flask handle expected HTTP errors like 404, 403, etc.
+    if isinstance(e, HTTPException) and e.code < 500:
+        return e
+
+    # Log unexpected errors (500+)
+    logging.exception("An internal server error occurred:")
+    return "Internal Server Error", 500
 
 
 # Function to upload an image to S3 and return the key
@@ -588,8 +599,8 @@ def index():
                 right_image=right_filename_col1 if split_right_x else right_filename,
                 left_image_2=left_filename_col2 if split_left_x else None,
                 right_image_2=right_filename_col2 if split_right_x else None,
-                debug_left=debug_left_render,
-                debug_right=debug_right_render,
+                debug_left=None,
+                debug_right=None,
 
                 error=None
             )
@@ -610,3 +621,6 @@ def index():
             )
 
     return render_template("index.html", text=None, audio=None, error=None)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=False)
