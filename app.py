@@ -14,7 +14,7 @@ import re
 import cohere
 import logging
 from werkzeug.exceptions import HTTPException
-
+import traceback
 
 # Setup
 load_dotenv()
