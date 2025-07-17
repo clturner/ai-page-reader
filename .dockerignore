@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments
+venv/
+env/
+.venv/
+
+# Environment files
+.env
+*.env
+
+# Docker artifacts
+*.log
+*.pid
+*.tar
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git and version control
+.git/
+.gitignore
+
+# IDE/editor configs
+.vscode/
+.idea/
+
+# Cache and compiled assets
+*.db
+*.sqlite3
+node_modules/
+*.egg-info/
+build/
+dist/
