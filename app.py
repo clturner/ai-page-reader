@@ -267,6 +267,7 @@ def detect_vertical_split_column(image, density_threshold=2, min_gap_width_ratio
 #    tweak angle_threshold=1.0 up to 1.5 or 2.0 if it's still over-rotating
 @try_wrapper
 def deskew_image(pil_img, angle_threshold=1.0):
+    return pil_img, False  # Skip deskewing for now
     img = np.array(pil_img.convert('L'))
     img = cv2.bitwise_not(img)
 
