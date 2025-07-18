@@ -25,6 +25,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy project files
 COPY . .
 
+RUN apt-get update && apt-get install -y awscli
+
 # Expose port for Flask
 EXPOSE 5000
 
