@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+
+# Git and IDE-related
+.git
+.gitignore
+*.swp
+*.swo
+*.bak
+*.tmp
+.DS_Store
+
+# Environment variables
+.env
+
+# Audio and media outputs
+*.wav
+*.mp3
+*.ogg
+speech-*
