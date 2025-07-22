@@ -19,7 +19,7 @@
     <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
-     <!-- <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"> -->
+    <!-- <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"> -->
 
     <!-- version query for css file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
@@ -91,6 +91,10 @@
                 </div>
 
                 <div class="form-check text-white mt-2">
+                    <input type="checkbox" class="form-check-input" id="twoColumnLayout" name="two_column_layout">
+                    <label class="form-check-label" for="twoColumnLayout">My pages are 2 column layout</label>
+                </div>
+                <div class="form-check text-white mt-2">
                     <input type="checkbox" class="form-check-input" id="splitPages" name="split_pages">
                     <label class="form-check-label" for="splitPages">This image contains two pages (left and right)</label>
                 </div>
@@ -139,7 +143,8 @@
         </div>
 
         <h2 class="mt-5">Extracted Text</h2>
-        <pre class="bg-light p-3 rounded">{{ text }}</pre>
+        <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: hidden; max-width: 100%;">{{ text }}</pre>
+        <!--<pre class="bg-light p-3 rounded">{{ text }}</pre>-->
 
         {% if audio %}
         <h2 class="mt-5">Speech</h2>
@@ -217,7 +222,7 @@
                     <div class="d-flex flex-column justify-content-start">
                         <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Privacy Policy</a>
                         <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Terms & Condition</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Regular FAQs</a>
+                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr- believers"></i>Regular FAQs</a>
                         <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Help & Support</a>
                         <a class="text-white-50" href="#"><i class="fa fa-angle-right mr-2"></i>Contact</a>
                     </div>
@@ -230,7 +235,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
-                    <p class="m-0">Copyright &copy; <a class="text-white" href="#">SnapReadAI</a>. All Rights Reserved.
+                    <p class="m-0">Copyright © <a class="text-white" href="#">SnapReadAI</a>. All Rights Reserved.
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-right">
