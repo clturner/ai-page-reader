@@ -29,54 +29,76 @@ MonReader is an innovative document digitization tool that converts images of bo
 
 ---
 
-## Setup Instructions
+## Setup Instructions 🚀
 
-1. **Clone the Repository**:
+> Get *MonReader* up and running in just a few steps!
+
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![AWS](https://img.shields.io/badge/AWS-EC2-orange?style=flat&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/ec2/)
+
+1. **Install Docker** 🐳:
+   Ensure *Docker* is installed on your system. Follow the [official Docker installation guide](https://docs.docker.com/get-docker/) for step-by-step instructions.
+
+2. **Build and Run the Docker Container**:
+   Use the following commands to build and launch *MonReader*:
    ```bash
-   git clone https://github.com/clturner/monreader.git
-   cd monreader
+   docker build -t monreader .
+   docker run -p 5000:5000 monreader
 
+   ## Access the Application 🌐
 
-Install Docker:Ensure Docker is installed on your system. Refer to Docker's official installation guide for detailed instructions.
+[![Flask](https://img.shields.io/badge/Flask-2.0+-green?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Accessibility](https://img.shields.io/badge/Accessibility-Focused-blue?style=flat&logo=accessible-icon)](https://www.w3.org/WAI/)
 
-Build and Run the Docker Container:
-docker build -t monreader .
-docker run -p 5000:5000 monreader
+Open your browser and navigate to `http://localhost:5000` to explore the *MonReader* web interface.
 
+> **Note** ☁️: For AWS EC2 deployment, ensure your instance has *Docker* installed and the necessary IAM roles configured. Check the [AWS EC2 documentation](https://docs.aws.amazon.com/ec2/) for setup details.
 
-Access the Application:Open your browser to http://localhost:5000 to access the MonReader web interface.
+---
 
+## Usage Instructions 📖
 
+Follow these steps to digitize your book pages with *MonReader*:
 
-Note: For AWS EC2 deployment, ensure your instance has Docker installed and appropriate IAM roles for AWS services. Refer to AWS documentation for EC2 setup.
+1. **Upload an Image** 📸:
+   Visit `http://localhost:5000` and *upload* an image of a book page via the web interface.
 
+2. **Select Layout Options** (optional):
+   Customize processing with these checkboxes:
 
-Usage Instructions
+   | Option | Description |
+   |--------|-------------|
+   | **My pages are 2 column layout** | Select for pages with two-column text formats. |
+   | **This image contains two pages (left and right)** | Select for scans of open books with left and right pages. |
 
-Upload an Image:Navigate to the web interface at http://localhost:5000 and upload an image of a book page.
+3. **Submit** 🚀:
+   Click *Submit* to process the image. *MonReader* will extract text and generate an audio file.
 
-Select Layout Options (optional):
+4. **Output** 🎧:
+   *Download* or *play* the extracted text and audio directly from the interface.
 
-Check "My pages are 2 column layout" for two-column formats.
-Check "This image contains two pages (left and right)" for dual-page scans.
+> **Pro Tip** 🧪: Experiment with different page layouts to see how *MonReader* handles complex formats!
 
+---
 
-Submit:Click Submit to process the image. MonReader will extract text and generate an audio file.
+## Example Input & Output 📚
 
-Output:Download or play the processed text and audio directly via the interface.
+Example images are located in the `pages/` directory, demonstrating:
+- **Single-page scans**: Standard one-page layouts.
+- **Two-column layouts**: Pages with dual-column text.
+- **Dual-page (left and right) scans**: Open book images with both pages visible.
 
+*Upload these images* to test *MonReader*’s OCR and audio generation capabilities. The output includes:
+- **Extracted Text**: Cleaned and formatted text from the page.
+- **Audio Files**: Read-aloud versions for accessibility.
 
+---
 
-Example Input & Output
-Example images are located in the pages/ directory, showcasing:
+## Status & Roadmap 🌟
 
-Single-page scans
-Two-column layouts
-Dual-page (left and right) scans
+*MonReader* is currently a **prototype**, showcasing the potential for a mobile application. It processes images via a *Flask-based web interface*, with core features like:
+- Page flip detection
+- OCR text extraction
+- Audio generation
 
-Upload these images to test MonReader’s OCR and audio generation capabilities. Outputs include extracted text and audio files with read-aloud versions.
-
-Status & Roadmap
-MonReader is a prototype demonstrating the potential for a mobile application. It currently processes images via a Flask web interface, with
-
-
+> **Vision** 🌍: Transform *MonReader* into a seamless mobile app for real-time document digitization and audio conversion, empowering accessibility for all!
