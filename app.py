@@ -164,9 +164,9 @@ def detect_vertical_split_column(image, density_threshold=2, min_gap_width_ratio
     print(f"[Split] Gap position: x = {int(np.mean(selected_gap))}")
     if width > 3000:
         min_gap_width_ratio = 0.002
-    required_min_gap = max(int(width * min_gap_width_ratio), 10)
+    required_min_gap = max(int(width * min_gap_width_ratio), 8)
     if len(selected_gap) < required_min_gap:
-        print(f"[Split] Gap too narrow — still drawing overlay for debug.")
+        print(f"[Split] Gap too narrow — still drawing overlay for debug. {len(selected_gap)}")
         if debug_filename:
             save_density_overlay(thresh, avg_density, os.path.join("static", "images", "debug_density_overlay.jpg"))
             debug_img = image.convert("RGB")
@@ -282,30 +282,31 @@ def light_clean_ocr_text(text: str, wrap_speak: bool = True, max_length: int = N
 @try_wrapper
 def clean_text_with_cohere(ocr_text: str, co) -> str:
     prompt = (
-            "You are a text-cleaning assistant.\n"
-            "Your task is to clean up OCR-scanned text.\n"
-            "Only do the following:\n"
-            "- Fix obviously misspelled words (correct spelling only if the intended word is clear).\n"
-            "- Remove stray characters or margin artifacts (e.g., page numbers, isolated digits or letters at the start or end).\n"
-            "- Do NOT summarize, paraphrase, reword, or restructure anything.\n"
-            "- Do NOT remove valid sentences or content.\n"
-            "- Keep all punctuation and sentence boundaries intact unless corrupted.\n"
-            "- Respond ONLY with the cleaned text. Do NOT explain your changes or say if you made any.\n\n"
-            f"OCR TEXT:\n{ocr_text}\n\n"
-            "Cleaned Text:"
+        "You are an OCR text cleaning assistant.\n\n"
+        "Your task is to clean up OCR-scanned text with the following strict rules:\n"
+        "- ONLY fix misspellings when the correct word is obvious.\n"
+        "- Remove artifacts like page numbers, margin text, or isolated characters.\n"
+        "- DO NOT rewrite, rephrase, summarize, or alter valid sentence structure.\n"
+        "- DO NOT add or infer words — if unsure, leave the text unchanged.\n"
+        "- Keep punctuation, sentence flow, and formatting exactly the same where intact.\n"
+        "- Return ONLY the cleaned text. No commentary or explanations.\n\n"
+        f"OCR TEXT:\n{ocr_text}\n\n"
+        "CLEANED TEXT:"
     )
+
     try:
         response = co.generate(
             model='command-r-plus',
             prompt=prompt,
             max_tokens=1200,
-            temperature=0.2,
+            temperature=0.1,  # Lowered for strictness
             truncate=None,
         )
         return response.generations[0].text.strip()
     except Exception as e:
         print("Error from Cohere:", e)
         return ""
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
