@@ -5,28 +5,51 @@
     <meta charset="utf-8">
     <title>AI Book Reader - Edukate Theme</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
         rel="stylesheet">
-
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-
     <!-- Libraries Stylesheet -->
     <link href="{{ url_for('static', filename='lib/owlcarousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
-
     <!-- Customized Bootstrap Stylesheet -->
     <!-- <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"> -->
-
     <!-- version query for css file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
-
+    <style>
+        /* Loader overlay styles */
+        #loader {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        #loader .spinner-container {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Loader Overlay -->
+    <div id="loader">
+        <div class="spinner-container">
+            <!-- Bootstrap spinner -->
+            <div class="spinner-border text-light" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Topbar Start -->
     <div class="container-fluid bg-dark">
         <div class="row py-2 px-lg-5">
@@ -83,8 +106,8 @@
         <div class="container text-center my-5 py-5">
             <h1 class="text-white display-1 mb-5">Upload Your Book Page</h1>
 
-            <!-- Upload Form -->
-            <form method="POST" enctype="multipart/form-data" class="mx-auto" style="max-width: 600px;">
+            <!-- Upload Form with an id for the JS hook -->
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" class="mx-auto" style="max-width: 600px;">
                 <div class="input-group mb-3">
                     <input type="file" class="form-control" name="image" accept="image/*" required>
                     <button class="btn btn-primary" type="submit">Submit</button>
@@ -119,21 +142,18 @@
                 <img src="{{ url_for('static', filename=left_image) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
-
             {% if left_image_2 %}
             <div class="col-md-3">
                 <h4>Left Page - Column 2</h4>
                 <img src="{{ url_for('static', filename=left_image_2) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
-
             {% if right_image %}
             <div class="col-md-3">
                 <h4>Right Page - Column 1</h4>
                 <img src="{{ url_for('static', filename=right_image) }}" class="img-fluid rounded mb-3 resized-image">
             </div>
             {% endif %}
-
             {% if right_image_2 %}
             <div class="col-md-3">
                 <h4>Right Page - Column 2</h4>
@@ -141,11 +161,8 @@
             </div>
             {% endif %}
         </div>
-
         <h2 class="mt-5">Extracted Text</h2>
         <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: hidden; max-width: 100%;">{{ text }}</pre>
-        <!--<pre class="bg-light p-3 rounded">{{ text }}</pre>-->
-
         {% if audio %}
         <h2 class="mt-5">Speech</h2>
         <audio controls class="w-100 mb-5">
@@ -155,7 +172,6 @@
         {% endif %}
         {% endif %}
     </div>
-
     {% if debug_left or debug_right %}
         <div class="row g-4 mt-4">
             {% if debug_left %}
@@ -222,7 +238,7 @@
                     <div class="d-flex flex-column justify-content-start">
                         <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Privacy Policy</a>
                         <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Terms & Condition</a>
-                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr- believers"></i>Regular FAQs</a>
+                        <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Regular FAQs</a>
                         <a class="text-white-50 mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>Help & Support</a>
                         <a class="text-white-50" href="#"><i class="fa fa-angle-right mr-2"></i>Contact</a>
                     </div>
@@ -239,8 +255,8 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-right">
-                    <p class="m-0">Designed by <a class="text-white" href="https://htmlcodex.com">Christopher Turner</a> Distributed
-                        by <a href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
+                    <p class="m-0">Designed by <a class="text-white" href="https://htmlcodex.com">Christopher Turner</a>
+                        Distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
                 </div>
             </div>
         </div>
@@ -248,8 +264,9 @@
     <!-- Footer End -->
 
     <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary rounded-0 btn-lg-square back-to-top"><i
-            class="fa fa-angle-double-up"></i></a>
+    <a href="#" class="btn btn-lg btn-primary rounded-0 btn-lg-square back-to-top">
+        <i class="fa fa-angle-double-up"></i>
+    </a>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -258,9 +275,23 @@
     <script src="{{ url_for('static', filename='lib/waypoints/waypoints.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/counterup/counterup.min.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/owlcarousel/owl.carousel.min.js') }}"></script>
-
     <!-- Template Javascript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Custom script for the progress animation -->
+    <script>
+        $(document).ready(function () {
+            $('#uploadForm').on('submit', function (e) {
+                // Optionally prevent default submission if you plan to handle it via ajax
+                // e.preventDefault();
+
+                // Hide the form (or clear the content if that’s preferred)
+                $(this).hide();
+                // Show the loader overlay
+                $('#loader').show();
+            });
+        });
+    </script>
 </body>
 
 </html>
