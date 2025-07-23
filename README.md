@@ -1,6 +1,12 @@
 # MonReader
 
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 MonReader is an innovative document digitization tool that converts images of book pages into audio format using advanced OCR and text-cleaning models. Designed for accessibility, it provides a seamless experience for the blind, researchers, and anyone needing fast, high-quality document scanning in bulk. MonReader detects page flips, captures high-resolution images, dewarps and enhances them, and extracts text with preserved formatting, ultimately generating audio versions of the content.
+
+---
 
 ## Key Features
 
@@ -9,13 +15,19 @@ MonReader is an innovative document digitization tool that converts images of bo
 - **Customizable Layout Options**: Supports two-column layouts and dual-page (left and right) scans via user-selectable checkboxes.
 - **Accessibility Focus**: Designed to make printed material accessible, with plans for enhanced text-to-speech and multilingual support.
 
+---
+
 ## Tech Stack
 
-- **Python**: Core programming language for processing and logic.
-- **Flask**: Web framework for the user interface.
-- **AWS**: Deployed on EC2 for scalable processing.
-- **Cohere**: Language models for text cleaning and semantic processing.
-- **Tesseract**: Open-source OCR engine for text extraction.
+| Technology | Purpose |
+|------------|---------|
+| **Python** | Core programming language for processing and logic |
+| **Flask**  | Web framework for the user interface |
+| **AWS**    | Deployed on EC2 for scalable processing |
+| **Cohere** | Language models for text cleaning and semantic processing |
+| **Tesseract** | Open-source OCR engine for text extraction |
+
+---
 
 ## Setup Instructions
 
@@ -25,55 +37,46 @@ MonReader is an innovative document digitization tool that converts images of bo
    cd monreader
 
 
-Install Docker: Ensure Docker is installed. See Docker's official installation guide for details.
+Install Docker:Ensure Docker is installed on your system. Refer to Docker's official installation guide for detailed instructions.
 
 Build and Run the Docker Container:
 docker build -t monreader .
 docker run -p 5000:5000 monreader
 
 
-Access the Application: Open your browser to http://localhost:5000 to use the web interface.
+Access the Application:Open your browser to http://localhost:5000 to access the MonReader web interface.
+
 
 
 Note: For AWS EC2 deployment, ensure your instance has Docker installed and appropriate IAM roles for AWS services. Refer to AWS documentation for EC2 setup.
+
+
 Usage Instructions
 
-Upload an Image: Navigate to the web interface and upload an image of a book page.
+Upload an Image:Navigate to the web interface at http://localhost:5000 and upload an image of a book page.
+
 Select Layout Options (optional):
+
 Check "My pages are 2 column layout" for two-column formats.
 Check "This image contains two pages (left and right)" for dual-page scans.
 
 
-Submit: Click "Submit" to process the image. MonReader will extract text and generate an audio file.
-Output: Download or play the processed text and audio via the interface.
+Submit:Click Submit to process the image. MonReader will extract text and generate an audio file.
+
+Output:Download or play the processed text and audio directly via the interface.
+
+
 
 Example Input & Output
-Example images are in the pages/ directory, showcasing:
+Example images are located in the pages/ directory, showcasing:
 
-Single-page scans.
-Two-column layouts.
-Dual-page (left and right) scans.
+Single-page scans
+Two-column layouts
+Dual-page (left and right) scans
 
-Upload these images to test MonReader’s OCR and audio generation. Outputs include extracted text and audio files with read-aloud versions.
+Upload these images to test MonReader’s OCR and audio generation capabilities. Outputs include extracted text and audio files with read-aloud versions.
+
 Status & Roadmap
-MonReader is a prototype demonstrating potential for a mobile application. It currently processes images via a Flask web interface, with core components for flip detection, OCR, and audio generation.
-Future Goals
-The vision is a streamlined mobile app for real-time document digitization and audio conversion. Roadmap items include:
-
-Real-Time Video Processing: Enable page flip detection from video input, optimized for varying lighting and hand movements.
-Page Sequence Management: Use detected page numbers to maintain document order.
-Robust Gutter Detection: Accurately split dual-page scans from bound books.
-Enhanced Layout Recognition: Improve column and layout detection for complex formats.
-Multilingual Support: Expand OCR and text-to-speech for multiple languages.
-Accessibility Features: Add customizable text-to-speech, adjustable playback speeds, and screen reader compatibility.
-
-This aims to enhance access to printed materials, especially for visually impaired and low-resource communities.
-License
-MonReader is licensed under the MIT License.
-Author / Contact
-
-Author: Christopher Turner
-LinkedIn: chris-turner-creates
-GitHub: clturner
+MonReader is a prototype demonstrating the potential for a mobile application. It currently processes images via a Flask web interface, with
 
 
